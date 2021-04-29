@@ -3,7 +3,7 @@ import {Text, View, StyleSheet, ScrollView, Image} from 'react-native';
 import {Icon, SearchBar} from 'react-native-elements';
 import {getSearch, getDetail} from '@/api';
 import {debounce, getRandomLove} from '@/utils';
-var Sound = require('react-native-sound');
+
 const loveName = getRandomLove();
 const handleSearch = debounce(search => {
   return getSearch({keywords: search});
@@ -11,6 +11,7 @@ const handleSearch = debounce(search => {
 
 export default function User(props) {
   const [search, setSearch] = useState('鹿乃');
+
   const [searchList, setSearchList] = useState([]);
   useEffect(() => {
     if (!search) {
@@ -23,27 +24,6 @@ export default function User(props) {
       setSearchList(res.result?.songs || []);
     });
   }, [search]);
-
-  const getMusicDetail = e => {
-    // console.log(e);
-    getDetail({id: e}).then(res => {
-      var music = new Sound(res?.data[0].url, Sound.MAIN_BUNDLE, error => {
-        if (error) {
-          Alert.alert('播放失败。。。');
-        }
-
-        music.play(success => {
-          if (success) {
-            console.log('successfully finished playing');
-          } else {
-            console.log('playback failed due to audio decoding errors');
-          }
-        });
-      });
-
-      console.log(res);
-    });
-  };
 
   return (
     <View style={style.root}>
@@ -61,7 +41,7 @@ export default function User(props) {
             <View style={style.searchItemInfo}>
               <Image style={style.infoImg} source={{uri: item?.al?.picUrl}}></Image>
               <Text numberOfLines={2} style={{fontSize: 14, width: 260}}>
-                {item?.name}
+                {item.name}
               </Text>
             </View>
             <View>
@@ -89,9 +69,6 @@ const style = StyleSheet.create({
     borderBottomColor: 'transparent', // 必须如此设置， 别问，问就是不会改
   },
   searchBar: {
-    // height: 36,
-    // marginHorizontal: 15,
-    // marginBottom: 15,
     height: 38,
     lineHeight: 38,
     paddingHorizontal: 10,
