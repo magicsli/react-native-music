@@ -14,6 +14,7 @@ import {Colors} from 'react-native/Libraries/NewAppScreen';
 import {SafeAreaProvider} from 'react-native-safe-area-context';
 import User from '@/pages/User';
 import Home from '@/pages/Home';
+import Search from '@/pages/Search';
 
 const Stack = createStackNavigator();
 
@@ -27,9 +28,10 @@ const App: () => Node = () => {
   return (
     <SafeAreaProvider>
       <NavigationContainer>
-        <Stack.Navigator initialRouteName="Home">
+        <Stack.Navigator initialRouteName="Search">
           <Stack.Screen name="User" component={User} />
           <Stack.Screen name="Home" component={Home} />
+          <Stack.Screen name="Search" component={Search} />
         </Stack.Navigator>
       </NavigationContainer>
     </SafeAreaProvider>

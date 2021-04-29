@@ -37,6 +37,11 @@ export default function Home(props) {
       });
   };
 
+  const handleSearch = () => {
+    console.log("xxxxxxxxx")
+    props.navigation.navigate("Search")
+  }
+
   useEffect(() => {
     if (!toast) return;
     handleGetPayList();
@@ -45,8 +50,9 @@ export default function Home(props) {
   return (
     <View style={style.root}>
       <Toast ref={e => setToast(e)} />
-      <View style={style.searchBar}>
-        <Icon raised name="heartbeat" type="font-awesome" color="#f50" onPress={() => console.log('hello')} />
+      <View onTouchEnd={handleSearch} style={style.searchBar}>
+        <Icon  name="search1" type="antdesign"  />
+        <Text style={style.searchText}>请输入搜索内容</Text>
       </View>
       <FlatList
         style={{flex: 1}}
@@ -73,9 +79,25 @@ const style = StyleSheet.create({
     paddingVertical: 15,
     paddingHorizontal: 5,
   },
+  searchBar: {
+    // height:32,
+    marginHorizontal: 15,
+    marginBottom: 15,
+    paddingHorizontal:10,
+    paddingVertical: 5,
+    borderRadius: 16,
+    flexDirection:"row",
+    justifyContent: "flex-start",
+    alignItems: "center",
+    backgroundColor:"#ccc",
+  },
+  searchText:{
+    marginLeft: 10,
+    color: "#666"
+  },
   playItem: {
     flex: 1,
-    maxWidth: (screenWidth - 40) / 3, // 解决最后一行 flex:1 时候样式占据了全行
+    width: (screenWidth - 40) / 3, // 解决最后一行 flex:1 时候样式占据了全行
     paddingHorizontal: 5,
     // backgroundColor: 'red',
     marginBottom: 15,

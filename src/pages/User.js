@@ -1,8 +1,8 @@
 import React from 'react'
 import { Text, View } from 'react-native';
 
-export default function User(props) {
+export default function Search(props) {
     return (<View>
-            <Text>dwdad</Text>
+            <Text>search</Text>
         </View>)
 }
