@@ -10,7 +10,7 @@ const handleSearch = debounce(search => {
 });
 
 export default function User(props) {
-  const [search, setSearch] = useState('鹿乃');
+  const [search, setSearch] = useState('tk');
 
   const [searchList, setSearchList] = useState([]);
   useEffect(() => {
@@ -24,6 +24,10 @@ export default function User(props) {
       setSearchList(res.result?.songs || []);
     });
   }, [search]);
+
+  const getMusicDetail = (id) => {
+    props.navigation.navigate("Play", {id: id})
+  }
 
   return (
     <View style={style.root}>

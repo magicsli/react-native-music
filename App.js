@@ -29,7 +29,7 @@ const App: () => Node = () => {
   return (
     <SafeAreaProvider>
       <NavigationContainer>
-        <Stack.Navigator initialRouteName="Play">
+        <Stack.Navigator initialRouteName="Home">
           <Stack.Screen name="User" component={User} />
           <Stack.Screen name="Home" component={Home} />
           <Stack.Screen name="Play" component={Play} />

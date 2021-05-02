@@ -3,8 +3,13 @@ import {Text, View, Image, ImageBackground, StyleSheet} from 'react-native';
 import {getMusicUrl, getMusicUrlDetail} from '@/api';
 import RotateInView from '@/components/RotateInView';
 var Sound = require('react-native-sound');
+
+
+let music; // 本页面唯一的播放器对象（不能交给hook控制，在退出useEffect时时无法调取当前hook值？？？）
+
 export default function Play(props) {
-  const ID = props?.navigation?.state?.params?.name || 1484837259;
+  console.log(props);
+  const ID = props?.route?.params?.id || 1484837259; 
   const [playNow, setPlayNow] = useState(null);
   const [detail, setDetail] = useState(null);
   const [play, setPlay] = useState(false);
@@ -19,7 +24,7 @@ export default function Play(props) {
   const getUrl = () => {
     getMusicUrl({id: ID}).then(res => {
       playNow?.release();
-      const music = new Sound(res?.data[0].url, Sound.MAIN_BUNDLE, error => {
+       music = new Sound(res?.data[0].url, Sound.MAIN_BUNDLE, error => {
         if (error) {
           Alert.alert('播放失败。。。');
         }
@@ -36,7 +41,7 @@ export default function Play(props) {
           }
         });
       });
-
+ 
       setPlayNow(music);
     });
   };
@@ -44,6 +49,15 @@ export default function Play(props) {
   useEffect(() => {
     getDetail();
     getUrl();
+
+    return () => {
+      console.log("释放音频资源")
+      // 停止播放
+      music?.stop(() => {
+        music.release();
+      });
+      
+    }
   }, []);
   return (
     <ImageBackground blurRadius={16} style={styles.root} source={{uri: detail?.al?.picUrl}}>

@@ -38,7 +38,6 @@ export default function Home(props) {
   };
 
   const handleSearch = () => {
-    console.log("xxxxxxxxx")
     props.navigation.navigate("Search")
   }
 
