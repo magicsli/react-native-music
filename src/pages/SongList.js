@@ -1,5 +1,6 @@
 import React, {useState, useEffect} from 'react';
 import {Text, View, StyleSheet, Image, ImageBackground, Dimensions, FlatList} from 'react-native';
+import {Icon} from 'react-native-elements';
 import {getPlaylistDetail, getMusicUrlDetail} from '@/api';
 
 const screenWidth = Dimensions.get('screen').width;
@@ -56,15 +57,18 @@ export default function SongList(props) {
         style={style.list}
         renderItem={({item, index}) => (
           <View style={style.songItem} onTouchEnd={() => getMusicDetail(item.id)}>
-            <Text style={style.songIndex}>{index}</Text>
-            <View style={{flex: 1}}>
-              <Text numberOfLines={1} style={style.songItemTitle}>
-                {item?.name}
-              </Text>
-              <Text numberOfLines={1} style={style.songAuthor}>
-                {item?.al?.name}
-              </Text>
+            <View style={{flex: 1, flexDirection: 'row'}}>
+              <Text style={style.songIndex}>{index}</Text>
+              <View style={{flex: 1}}>
+                <Text numberOfLines={1} style={style.songItemTitle}>
+                  {item?.name}
+                </Text>
+                <Text numberOfLines={1} style={style.songAuthor}>
+                  {item?.al?.name}
+                </Text>
+              </View>
             </View>
+            <Icon name="caretright" type="antdesign" size={14} color="#666" />
           </View>
         )}
         keyExtractor={item => item.id}
@@ -86,6 +90,7 @@ const style = StyleSheet.create({
     position: 'absolute',
     top: 0,
     left: 0,
+    zIndex: 3,
     // height: ',
     width: '100%',
     padding: 20,
@@ -123,6 +128,8 @@ const style = StyleSheet.create({
     fontSize: 14,
   },
   detailBackGround: {
+    position: 'relative',
+    zIndex: 2,
     height: screenWidth * 5,
     width: screenWidth * 5,
     transform: [{translateX: screenWidth * 4 * -0.5}, {translateY: screenWidth * -4 - 200}],
@@ -132,13 +139,17 @@ const style = StyleSheet.create({
     // borderBottomEndRadius:400,
   },
   list: {
+    marginTop: -50,
+    paddingTop: 50,
+    position: 'relative',
+    zIndex: 1,
     flex: 1,
-    height: 300,
     // backgroundColor: 'red',
   },
   songItem: {
     flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'space-between',
     marginVertical: 2,
     paddingRight: 15,
     // height: 50,
