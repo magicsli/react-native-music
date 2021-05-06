@@ -25,9 +25,9 @@ export default function User(props) {
     });
   }, [search]);
 
-  const getMusicDetail = (id) => {
-    props.navigation.navigate("Play", {id: id})
-  }
+  const getMusicDetail = id => {
+    props.navigation.navigate('Play', {id});
+  };
 
   return (
     <View style={style.root}>

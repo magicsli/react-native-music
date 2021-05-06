@@ -24,6 +24,7 @@ export default function Home(props) {
     if (refresh) setRefreshing(true);
     return getPlayList({limit: 20, before: refresh ? '' : lasttime})
       .then(res => {
+        console.log(res);
         setRefreshing(false);
         setLasttime(res.lasttime);
         if (refresh) {
@@ -38,8 +39,11 @@ export default function Home(props) {
   };
 
   const handleSearch = () => {
-    props.navigation.navigate("Search")
-  }
+    props.navigation.navigate('Search');
+  };
+  const handleSongList = id => {
+    props.navigation.navigate('SongList', {id});
+  };
 
   useEffect(() => {
     if (!toast) return;
@@ -50,7 +54,7 @@ export default function Home(props) {
     <View style={style.root}>
       <Toast ref={e => setToast(e)} />
       <View onTouchEnd={handleSearch} style={style.searchBar}>
-        <Icon  name="search1" type="antdesign"  />
+        <Icon name="search1" type="antdesign" />
         <Text style={style.searchText}>请输入搜索内容</Text>
       </View>
       <FlatList
@@ -61,7 +65,7 @@ export default function Home(props) {
         onRefresh={() => handleGetPayList(true)}
         onEndReached={() => handleGetPayList()}
         renderItem={({item}) => (
-          <View style={style.playItem}>
+          <View style={style.playItem} onTouchEnd={() => handleSongList(item.id)}>
             <Image style={style.playImage} source={{uri: item.coverImgUrl}}></Image>
             <Text numberOfLines={2}>{item.copywriter}</Text>
           </View>
@@ -82,17 +86,17 @@ const style = StyleSheet.create({
     // height:32,
     marginHorizontal: 15,
     marginBottom: 15,
-    paddingHorizontal:10,
+    paddingHorizontal: 10,
     paddingVertical: 5,
     borderRadius: 16,
-    flexDirection:"row",
-    justifyContent: "flex-start",
-    alignItems: "center",
-    backgroundColor:"#ccc",
+    flexDirection: 'row',
+    justifyContent: 'flex-start',
+    alignItems: 'center',
+    backgroundColor: '#ccc',
   },
-  searchText:{
+  searchText: {
     marginLeft: 10,
-    color: "#666"
+    color: '#666',
   },
   playItem: {
     flex: 1,

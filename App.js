@@ -16,6 +16,7 @@ import User from '@/pages/User';
 import Home from '@/pages/Home';
 import Search from '@/pages/Search';
 import Play from '@/pages/Play';
+import SongList from '@/pages/SongList';
 
 const Stack = createStackNavigator();
 
@@ -34,6 +35,7 @@ const App: () => Node = () => {
           <Stack.Screen name="Home" component={Home} />
           <Stack.Screen name="Play" component={Play} />
           <Stack.Screen name="Search" component={Search} />
+          <Stack.Screen name="SongList" component={SongList} />
         </Stack.Navigator>
       </NavigationContainer>
     </SafeAreaProvider>
