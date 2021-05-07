@@ -10,7 +10,6 @@ const screenWidth = Dimensions.get('screen').width;
 const screenHeight = Dimensions.get('screen').height;
 
 function Home(props) {
-  console.log(`props`, props);
   const [playlist, setPlaylist] = useState([]);
   const [toast, setToast] = useState(null);
   const [refreshing, setRefreshing] = useState(true);
@@ -27,7 +26,7 @@ function Home(props) {
     if (refresh) setRefreshing(true);
     return getPlayList({limit: 20, before: refresh ? '' : lasttime})
       .then(res => {
-        props.store.addCounter(1);
+        // props.store.addCounter(1);
         setRefreshing(false);
         setLasttime(res.lasttime);
         if (refresh) {
@@ -37,6 +36,7 @@ function Home(props) {
         }
       })
       .catch(err => {
+        console.error(err)
         toast.show('接口错误');
       });
   };
@@ -58,10 +58,10 @@ function Home(props) {
       <Toast ref={e => setToast(e)} />
       <View onTouchEnd={handleSearch} style={style.searchBar}>
         <Icon name="search1" type="antdesign" />
-        <Text style={style.searchText}>请输入搜索内{props.store.counter}容</Text>
+        <Text style={style.searchText}>请输入搜索内容</Text>
       </View>
       <FlatList
-        style={{flex: 1}}
+        style={{flex: 1, paddingHorizontal: 5,}}
         data={playlist}
         numColumns={3}
         refreshing={refreshing}
@@ -75,7 +75,7 @@ function Home(props) {
         )}
         keyExtractor={item => item.id + item.name}
       />
-      <PlayControlBottom />
+      <PlayControlBottom  {...props} />
     </View>
   );
 }
@@ -85,8 +85,8 @@ export default inject('store')(observer(Home));
 const style = StyleSheet.create({
   root: {
     flex: 1,
-    paddingVertical: 15,
-    paddingHorizontal: 5,
+    paddingTop: 15,
+    justifyContent: "space-between"
   },
   searchBar: {
     // height:32,

@@ -3,70 +3,45 @@ import {Text, View, Image, ImageBackground, StyleSheet} from 'react-native';
 import {getMusicUrl, getMusicUrlDetail} from '@/api';
 import RotateInView from '@/components/RotateInView';
 var Sound = require('react-native-sound');
-
+import {observer, inject} from 'mobx-react';
 
 let music; // 本页面唯一的播放器对象（不能交给hook控制，在退出useEffect时时无法调取当前hook值？？？）
 
-export default function Play(props) {
-  console.log(props);
-  const ID = props?.route?.params?.id || 1484837259; 
-  const [playNow, setPlayNow] = useState(null);
-  const [detail, setDetail] = useState(null);
+function Play(props) {
+  // let {currType} = props.RootStore;
+  console.log(props)
+  const playMusic = props.store?.getPlayMusic
+  const ID = props?.route?.params?.id || playMusic?.id; 
+ 
+  console.log(playMusic)
   const [play, setPlay] = useState(false);
 
   const getDetail = () => {
     getMusicUrlDetail({ids: ID}).then(res => {
-      console.log(res.songs?.[0]);
-      setDetail(res.songs?.[0]);
+      props.store?.replenishMusic(res.songs?.[0])
     });
   };
 
   const getUrl = () => {
     getMusicUrl({id: ID}).then(res => {
-      playNow?.release();
-       music = new Sound(res?.data[0].url, Sound.MAIN_BUNDLE, error => {
-        if (error) {
-          Alert.alert('播放失败。。。');
-        }
-        setPlay(true);
-
-        music.play(success => {
-          setPlay(false);
-          if (success) {
-            // 播放结束
-            console.log('successfully finished playing');
-          } else {
-            // 播放错误， 意外终止
-            console.log('playback failed due to audio decoding errors');
-          }
-        });
-      });
- 
-      setPlayNow(music);
+      props.store?.pushPlayMusic(res.data[0])
     });
   };
-
   useEffect(() => {
     getDetail();
     getUrl();
-
-    return () => {
-      console.log("释放音频资源")
-      // 停止播放
-      music?.stop(() => {
-        music.release();
-      });
-      
-    }
   }, []);
   return (
-    <ImageBackground blurRadius={16} style={styles.root} source={{uri: detail?.al?.picUrl}}>
+    // <ImageBackground blurRadius={16} style={styles.root} source={{uri: detail?.al?.picUrl}}>
+    <ImageBackground blurRadius={16} style={styles.root} source={{uri: playMusic?.al?.picUrl}}>
       <View style={styles.main}>
         <View style={{position: 'relative'}}>
           <Image source={require('@/assets/img/probe.png')} style={styles.probe}></Image>
           <RotateInView isPlay={play} style={styles.recordBox}>
             <ImageBackground style={styles.record} source={require('@/assets/img/record.png')}>
-              <Image source={{uri: detail?.al?.picUrl}} style={styles.cover}></Image>
+              {/* <Image source={{uri: detail?.al?.picUrl}} style={styles.cover}></Image> */}
+              <Image source={{uri: playMusic?.al?.picUrl}} style={styles.cover}></Image>
+              
             </ImageBackground>
           </RotateInView>
         </View>
@@ -74,7 +49,7 @@ export default function Play(props) {
     </ImageBackground>
   );
 }
-
+export default inject('store')(observer(Play));
 const styles = StyleSheet.create({
   root: {
     flex: 1,
