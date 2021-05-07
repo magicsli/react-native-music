@@ -3,13 +3,13 @@ import {Text, View, StyleSheet, ScrollView, Image} from 'react-native';
 import {Icon, SearchBar} from 'react-native-elements';
 import {getSearch, getDetail} from '@/api';
 import {debounce, getRandomLove} from '@/utils';
-
+import {observer, inject} from 'mobx-react';
 const loveName = getRandomLove();
 const handleSearch = debounce(search => {
   return getSearch({keywords: search});
 });
 
-export default function User(props) {
+function User(props) {
   const [search, setSearch] = useState('tk');
 
   const [searchList, setSearchList] = useState([]);
@@ -59,7 +59,7 @@ export default function User(props) {
     </View>
   );
 }
-
+export default inject('store')(observer(User));
 const style = StyleSheet.create({
   root: {
     flex: 1,

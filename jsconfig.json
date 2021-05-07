@@ -3,6 +3,7 @@
     "target": "es2020",
     "baseUrl": "./",
     "jsx": "react-native",
+    "experimentalDecorators": true,
     "paths": {
       "@/*": ["src/*"]
     }

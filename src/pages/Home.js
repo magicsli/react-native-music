@@ -3,10 +3,14 @@ import {Dimensions, StyleSheet, Text, View, Image, FlatList} from 'react-native'
 import Toast, {DURATION} from 'react-native-easy-toast';
 import {Icon} from 'react-native-elements';
 import {getPlayList} from '@/api';
+import {observer, inject} from 'mobx-react';
+import PlayControlBottom from '@/components/PlayControlBottom';
+
 const screenWidth = Dimensions.get('screen').width;
 const screenHeight = Dimensions.get('screen').height;
 
-export default function Home(props) {
+function Home(props) {
+  console.log(`props`, props);
   const [playlist, setPlaylist] = useState([]);
   const [toast, setToast] = useState(null);
   const [refreshing, setRefreshing] = useState(true);
@@ -19,12 +23,11 @@ export default function Home(props) {
    * @returns
    */
   const handleGetPayList = (refresh = false) => {
-    console.log(refresh);
     // 如果为刷新状态， 显示loading
     if (refresh) setRefreshing(true);
     return getPlayList({limit: 20, before: refresh ? '' : lasttime})
       .then(res => {
-        console.log(res);
+        props.store.addCounter(1);
         setRefreshing(false);
         setLasttime(res.lasttime);
         if (refresh) {
@@ -55,7 +58,7 @@ export default function Home(props) {
       <Toast ref={e => setToast(e)} />
       <View onTouchEnd={handleSearch} style={style.searchBar}>
         <Icon name="search1" type="antdesign" />
-        <Text style={style.searchText}>请输入搜索内容</Text>
+        <Text style={style.searchText}>请输入搜索内{props.store.counter}容</Text>
       </View>
       <FlatList
         style={{flex: 1}}
@@ -72,9 +75,12 @@ export default function Home(props) {
         )}
         keyExtractor={item => item.id + item.name}
       />
+      <PlayControlBottom />
     </View>
   );
 }
+
+export default inject('store')(observer(Home));
 
 const style = StyleSheet.create({
   root: {
