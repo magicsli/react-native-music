@@ -26,7 +26,10 @@ function User(props) {
   }, [search]);
 
   const getMusicDetail = id => {
-    props.navigation.navigate('Play', {id});
+    props.store.resetSongList(searchList);
+    props.store?.palyMusicById(id);
+
+    props.navigation.navigate('Play');
   };
 
   return (

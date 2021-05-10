@@ -2,11 +2,12 @@ import React, {useState, useEffect} from 'react';
 import {Text, View, StyleSheet, Image, ImageBackground, Dimensions, FlatList} from 'react-native';
 import {Icon} from 'react-native-elements';
 import {getPlaylistDetail, getMusicUrlDetail} from '@/api';
+import {observer, inject} from 'mobx-react';
 
 const screenWidth = Dimensions.get('screen').width;
 const screenHeight = Dimensions.get('screen').height;
 
-export default function SongList(props) {
+function SongList(props) {
   id = props?.route?.params?.id || 2140965208;
   const [detail, setDetail] = useState(null);
   const [playList, setPlayList] = useState([]);
@@ -25,7 +26,11 @@ export default function SongList(props) {
   }, []);
 
   const getMusicDetail = id => {
-    props.navigation.navigate('Play', {id});
+    // 截取歌单的前二十位作为播放列表
+    props.store?.resetSongList(playList);
+    props.store?.palyMusicById(id);
+
+    props.navigation.navigate('Play');
   };
 
   return (
@@ -76,6 +81,8 @@ export default function SongList(props) {
     </View>
   );
 }
+
+export default inject('store')(observer(SongList));
 
 const style = StyleSheet.create({
   root: {

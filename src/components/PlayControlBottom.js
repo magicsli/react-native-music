@@ -1,54 +1,93 @@
 import React, {useState, useEffect} from 'react';
-import {StyleSheet, Text, View, Image, ImageBackground, TouchableWithoutFeedback} from 'react-native';
-import {Icon, BottomSheet, ListItem} from 'react-native-elements';
+import {StyleSheet, Text, View, Image, FlatList, ImageBackground, Modal, SafeAreaView} from 'react-native';
+import {Icon, ListItem, Avatar} from 'react-native-elements';
 import {getPlayList} from '@/api';
 import {observer, inject} from 'mobx-react';
 import RotateInView from '@/components/RotateInView';
 
 function PlayControlBottom(props) {
-    const {playMusic} = props?.store;
-    console.log(props);
+  const {playMusic} = props?.store;
+
   const [isVisible, setIsVisible] = useState(false);
-  const list = [
-    {title: 'ListItem1'},
-    {title: 'ListItem2'},
-    {
-      title: 'Cancel',
-      containerStyle: {backgroundColor: 'red'},
-      titleStyle: {color: 'white'},
-      onPress: () => setIsVisible(false),
-    },
-  ];
-  const handeTest = e => {
-    console.log(e, "item event");
-    e.stopPropagation()
-    e.preventDefault()
-  }
+
+  const handleShowList = e => {
+    e.preventDefault();
+    setIsVisible(true);
+  };
+
+  const getMusicDetail = id => {
+    props.store.palyMusicById(id);
+  };
+
+  // 删除歌单中的某一项
+  const handleDelteItem = id => {
+    props.store.deteleSongItemById(id);
+  };
+
+  // 切换当前播放
+  const handeCheckPlay = id => {
+    props.store.palyMusicById(id);
+  };
+
   return (
-    <View style={styles.root}  onTouchEnd={() => props.navigation.navigate('Play')}>
-      <RotateInView isPlay={true} style={styles.recordBox}>
+    <View style={styles.root}>
+      <RotateInView onTouchEnd={() => props.navigation.navigate('Play')} isPlay={props.store._playing} style={styles.recordBox}>
         <ImageBackground style={styles.record} source={require('@/assets/img/record.png')}>
           <Image source={{uri: playMusic?.al?.picUrl}} style={styles.cover}></Image>
         </ImageBackground>
       </RotateInView>
-      <Text numberOfLines={1} style={styles.name}>
-        {playMusic?.al?.name || playMusic?.name} - {playMusic?.ar?.map(item => (<Text key={item.id} style={styles.author}>{item.name}</Text>))}
+      <Text onTouchEnd={() => props.navigation.navigate('Play')} numberOfLines={1} style={styles.name}>
+        {playMusic?.al?.name || playMusic?.name} -{' '}
+        {playMusic?.ar?.map(item => (
+          <Text key={item.id} style={styles.author}>
+            {item.name}
+          </Text>
+        ))}
       </Text>
       <View style={styles.control}>
-        <Icon style={{marginRight: 18}} name="playcircleo" type="antdesign" size={22} color="#666" />
-        <Icon name="menuunfold" type="antdesign" size={22} color="#666" onPress={() => setIsVisible(true)} />
+        <View>
+          <Icon name={props.store._playing ? 'playcircle' : 'pausecircleo'} type="antdesign" onPress={() => props.store.checkPlay()} size={22} color="#666" />
+        </View>
+        <View style={{marginLeft: 18}}>
+          <Icon name="menuunfold" type="antdesign" size={22} color="#666" onPress={handleShowList} />
+        </View>
       </View>
-      <BottomSheet modalProps={{animationType: "fade"}} onTouchEnd={(e) => console.log('Xxx', e.taget)} isVisible={isVisible} containerStyle={{backgroundColor: 'rgba(0.5, 0.25, 0, 0.2)'}}>
-        {list.map((l, i) => (
-          <ListItem  key={i} containerStyle={{zIndex: 1}} onTouchEnd={e => e.preventDefault()} onPress={handeTest}>
-            <ListItem.Content>
-              <ListItem.Title style={l.titleStyle}>
-                <Text>{l.title}</Text>
-              </ListItem.Title>
-            </ListItem.Content>
-          </ListItem>
-        ))}
-      </BottomSheet>
+
+      <Modal animationType="slide" transparent={true} visible={isVisible}>
+        <SafeAreaView style={styles.safeAreaView}>
+          {/* 不知道为什么， 不加背景色属性就无法触发touchEnd事件， 猜测是由于层级问题。。。 */}
+          <View style={{flex: 1, backgroundColor: 'transparent'}} onTouchEnd={() => setIsVisible(false)}></View>
+
+          <View style={styles.containList}>
+            <Text style={styles.listTitle}>
+              当前播放
+              <Text style={styles.listSubTitle}>（{props.store.songList.length}）</Text>
+            </Text>
+            <FlatList
+              data={props.store.songList.slice(0, 16)}
+              renderItem={({item, index}) => (
+                <ListItem containerStyle={{paddingVertical: 8}} key={item.id} onPress={() => handeCheckPlay(item.id)}>
+                  <Avatar rounded source={{uri: item?.al?.picUrl}} />
+                  <ListItem.Content>
+                    <ListItem.Title>
+                      <Text style={{fontSize: 14, maxWidth: 260}} numberOfLines={1}>
+                        {item?.al.name}
+                      </Text>{' '}
+                    </ListItem.Title>
+                    <ListItem.Subtitle>
+                      <Text numberOfLines={1} style={{maxWidth: 200}}>
+                        {item?.ar?.map(item => item.name)?.join(' ')}
+                      </Text>{' '}
+                    </ListItem.Subtitle>
+                  </ListItem.Content>
+                  <ListItem.Chevron onPress={() => handleDelteItem(item.id)} name="close" type="antdesign" />
+                </ListItem>
+              )}
+              keyExtractor={item => item.id}
+            />
+          </View>
+        </SafeAreaView>
+      </Modal>
     </View>
   );
 }
@@ -62,6 +101,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingHorizontal: 10,
     paddingBottom: 15,
+
     // backgroundColor: 'pink',
   },
   recordBox: {
@@ -100,5 +140,29 @@ const styles = StyleSheet.create({
     // paddingHorizontal: 10,
     alignItems: 'center',
     flexDirection: 'row',
+  },
+  containList: {
+    maxHeight: 400,
+    backgroundColor: '#ffffff',
+    // flexDirection: 'column',
+    // justifyContent: 'flex-end',
+    // justifyContent: 'flex-end',
+    // alignItems: 'flex-end',
+  },
+  listTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    paddingHorizontal: 16,
+    paddingVertical: 20,
+  },
+  listSubTitle: {
+    fontSize: 12,
+    marginLeft: 5,
+    color: '#ccc',
+  },
+  safeAreaView: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.2)',
+    flexDirection: 'column',
   },
 });

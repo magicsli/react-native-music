@@ -8,40 +8,19 @@ import {observer, inject} from 'mobx-react';
 let music; // 本页面唯一的播放器对象（不能交给hook控制，在退出useEffect时时无法调取当前hook值？？？）
 
 function Play(props) {
-  // let {currType} = props.RootStore;
-  console.log(props)
-  const playMusic = props.store?.getPlayMusic
-  const ID = props?.route?.params?.id || playMusic?.id; 
- 
-  console.log(playMusic)
-  const [play, setPlay] = useState(false);
+  const playMusic = props.store?.getPlayMusic;
+  const ID = props?.route?.params?.id || playMusic?.id;
 
-  const getDetail = () => {
-    getMusicUrlDetail({ids: ID}).then(res => {
-      props.store?.replenishMusic(res.songs?.[0])
-    });
-  };
-
-  const getUrl = () => {
-    getMusicUrl({id: ID}).then(res => {
-      props.store?.pushPlayMusic(res.data[0])
-    });
-  };
-  useEffect(() => {
-    getDetail();
-    getUrl();
-  }, []);
   return (
     // <ImageBackground blurRadius={16} style={styles.root} source={{uri: detail?.al?.picUrl}}>
     <ImageBackground blurRadius={16} style={styles.root} source={{uri: playMusic?.al?.picUrl}}>
       <View style={styles.main}>
-        <View style={{position: 'relative'}}>
+        <View onTouchEnd={() => props.store.checkPlay()} style={{position: 'relative'}}>
           <Image source={require('@/assets/img/probe.png')} style={styles.probe}></Image>
-          <RotateInView isPlay={play} style={styles.recordBox}>
+          <RotateInView isPlay={!!props.store._playing} style={styles.recordBox}>
             <ImageBackground style={styles.record} source={require('@/assets/img/record.png')}>
               {/* <Image source={{uri: detail?.al?.picUrl}} style={styles.cover}></Image> */}
               <Image source={{uri: playMusic?.al?.picUrl}} style={styles.cover}></Image>
-              
             </ImageBackground>
           </RotateInView>
         </View>
