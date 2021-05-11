@@ -21,17 +21,20 @@ function PlayControlBottom(props) {
 
   // 删除歌单中的某一项
   const handleDelteItem = id => {
+    console.log(id);
     props.store.deteleSongItemById(id);
   };
 
   // 切换当前播放
   const handeCheckPlay = id => {
+    console.log(props.store);
     props.store.palyMusicById(id);
   };
 
+  const _playing = props.store.playMusicStatus.open;
   return (
     <View style={styles.root}>
-      <RotateInView onTouchEnd={() => props.navigation.navigate('Play')} isPlay={props.store._playing} style={styles.recordBox}>
+      <RotateInView onTouchEnd={() => props.navigation.navigate('Play')} isPlay={_playing} style={styles.recordBox}>
         <ImageBackground style={styles.record} source={require('@/assets/img/record.png')}>
           <Image source={{uri: playMusic?.al?.picUrl}} style={styles.cover}></Image>
         </ImageBackground>
@@ -46,7 +49,11 @@ function PlayControlBottom(props) {
       </Text>
       <View style={styles.control}>
         <View>
-          <Icon name={props.store._playing ? 'playcircle' : 'pausecircleo'} type="antdesign" onPress={() => props.store.checkPlay()} size={22} color="#666" />
+          {_playing ? (
+            <Icon name="pausecircleo" type="antdesign" onPress={() => props.store.checkPlay()} size={22} color="#666" />
+          ) : (
+            <Icon name="playcircleo" type="antdesign" onPress={() => props.store.checkPlay()} size={22} color="#666" />
+          )}
         </View>
         <View style={{marginLeft: 18}}>
           <Icon name="menuunfold" type="antdesign" size={22} color="#666" onPress={handleShowList} />
@@ -80,6 +87,7 @@ function PlayControlBottom(props) {
                       </Text>{' '}
                     </ListItem.Subtitle>
                   </ListItem.Content>
+                  {/* <ListItem.Chevron onPress={() => handleDelteItem(item.id)} name="add" type="ionic" /> */}
                   <ListItem.Chevron onPress={() => handleDelteItem(item.id)} name="close" type="antdesign" />
                 </ListItem>
               )}
@@ -143,6 +151,7 @@ const styles = StyleSheet.create({
   },
   containList: {
     maxHeight: 400,
+    minHeight: 200,
     backgroundColor: '#ffffff',
     // flexDirection: 'column',
     // justifyContent: 'flex-end',

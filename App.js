@@ -6,7 +6,8 @@
  * @flow strict-local
  */
 
-import React from 'react';
+import React, {useState, useEffect} from 'react';
+import Toast from 'react-native-easy-toast';
 import {NavigationContainer} from '@react-navigation/native';
 import {createStackNavigator} from '@react-navigation/stack';
 import {SafeAreaView, StatusBar, useColorScheme} from 'react-native';
@@ -24,15 +25,21 @@ const Stack = createStackNavigator();
 
 const App: () => Node = () => {
   const isDarkMode = useColorScheme() === 'dark';
-
+  const [toast, setToast] = useState(null);
+  const [store, setStore] = useState(appStore);
   const backgroundStyle = {
     backgroundColor: isDarkMode ? Colors.darker : Colors.lighter,
   };
+
+  useEffect(() => {
+    toast && appStore.setToast(toast);
+  }, [toast]);
 
   return (
     <Provider store={appStore}>
       <SafeAreaProvider>
         <NavigationContainer>
+          <Toast ref={e => setToast(e)} />
           <Stack.Navigator initialRouteName="Home">
             <Stack.Screen name="User" component={User} />
             <Stack.Screen name="Home" component={Home} />

@@ -4,6 +4,8 @@ import {Icon, SearchBar} from 'react-native-elements';
 import {getSearch, getDetail} from '@/api';
 import {debounce, getRandomLove} from '@/utils';
 import {observer, inject} from 'mobx-react';
+import PlayControlBottom from '@/components/PlayControlBottom';
+
 const loveName = getRandomLove();
 const handleSearch = debounce(search => {
   return getSearch({keywords: search});
@@ -44,21 +46,26 @@ function User(props) {
       />
       <ScrollView style={{flex: 1}}>
         {searchList.map((item, index) => (
-          <View onTouchEnd={() => getMusicDetail(item.id)} key={item.id} style={style.searchItem}>
-            <View style={style.searchItemInfo}>
+          <View key={item.id} style={style.searchItem}>
+            <View onTouchEnd={() => getMusicDetail(item.id)} style={style.searchItemInfo}>
               <Image style={style.infoImg} source={{uri: item?.al?.picUrl}}></Image>
-              <Text numberOfLines={2} style={{fontSize: 14, width: 260}}>
-                {item.name}
-              </Text>
+              <View style={{flex: 1}}>
+                <Text numberOfLines={1} style={{fontSize: 14}}>
+                  {item.name}
+                </Text>
+                <Text numberOfLines={1} style={style.author}>
+                  {item?.ar?.map(item => item.name)?.join('  ')}
+                </Text>
+              </View>
             </View>
-            <View>
-              <Text numberOfLines={1} style={style.author}>
-                {item?.ar?.map(item => item.name)?.join('  ')}
-              </Text>
+            <View style={{flexDirection: 'row', alignItems: 'center'}}>
+              <Icon onPress={() => props.store.pushSong(item)} name="rightcircleo" size={20} color="#666" type="antdesign" />
             </View>
           </View>
         ))}
       </ScrollView>
+
+      <PlayControlBottom {...props} />
     </View>
   );
 }
@@ -116,9 +123,9 @@ const style = StyleSheet.create({
     marginRight: 10,
   },
   author: {
-    maxWidth: 120,
+    maxWidth: 140,
     color: '#666',
-    marginRight: 5,
+    marginTop: 5,
     fontSize: 12,
   },
 });

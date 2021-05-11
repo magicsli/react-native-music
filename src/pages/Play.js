@@ -12,14 +12,13 @@ function Play(props) {
   const ID = props?.route?.params?.id || playMusic?.id;
 
   return (
-    // <ImageBackground blurRadius={16} style={styles.root} source={{uri: detail?.al?.picUrl}}>
-    <ImageBackground blurRadius={16} style={styles.root} source={{uri: playMusic?.al?.picUrl}}>
+    <ImageBackground blurRadius={36} style={styles.root} source={{uri: playMusic?.al?.picUrl}}>
       <View style={styles.main}>
         <View onTouchEnd={() => props.store.checkPlay()} style={{position: 'relative'}}>
           <Image source={require('@/assets/img/probe.png')} style={styles.probe}></Image>
-          <RotateInView isPlay={!!props.store._playing} style={styles.recordBox}>
+          {/* 由于mobx迷之响应， 如果直接读取_playing 无法更新组件， 所以手动记录播放状态， 此为下策 */}
+          <RotateInView isPlay={!!props.store.playMusicStatus.open} style={styles.recordBox}>
             <ImageBackground style={styles.record} source={require('@/assets/img/record.png')}>
-              {/* <Image source={{uri: detail?.al?.picUrl}} style={styles.cover}></Image> */}
               <Image source={{uri: playMusic?.al?.picUrl}} style={styles.cover}></Image>
             </ImageBackground>
           </RotateInView>

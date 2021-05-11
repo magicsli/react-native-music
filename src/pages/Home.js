@@ -1,6 +1,5 @@
 import React, {useState, useEffect} from 'react';
 import {Dimensions, StyleSheet, Text, View, Image, FlatList} from 'react-native';
-import Toast, {DURATION} from 'react-native-easy-toast';
 import {Icon} from 'react-native-elements';
 import {getPlayList} from '@/api';
 import {observer, inject} from 'mobx-react';
@@ -11,10 +10,9 @@ const screenHeight = Dimensions.get('screen').height;
 
 function Home(props) {
   const [playlist, setPlaylist] = useState([]);
-  const [toast, setToast] = useState(null);
+
   const [refreshing, setRefreshing] = useState(true);
   const [lasttime, setLasttime] = useState('');
-  // 绑定 [] 在第一次进入时加载数据
 
   /**
    *
@@ -36,32 +34,31 @@ function Home(props) {
         }
       })
       .catch(err => {
-        console.error(err)
-        toast.show('接口错误');
+        console.error(err);
+        props.store.toast('接口错误');
       });
   };
 
   const handleSearch = () => {
     props.navigation.navigate('Search');
   };
+
   const handleSongList = id => {
     props.navigation.navigate('SongList', {id});
   };
 
   useEffect(() => {
-    if (!toast) return;
     handleGetPayList();
-  }, [toast]);
+  }, []);
 
   return (
     <View style={style.root}>
-      <Toast ref={e => setToast(e)} />
       <View onTouchEnd={handleSearch} style={style.searchBar}>
         <Icon name="search1" type="antdesign" />
         <Text style={style.searchText}>请输入搜索内容</Text>
       </View>
       <FlatList
-        style={{flex: 1, paddingHorizontal: 5,}}
+        style={{flex: 1, paddingHorizontal: 5}}
         data={playlist}
         numColumns={3}
         refreshing={refreshing}
@@ -75,7 +72,7 @@ function Home(props) {
         )}
         keyExtractor={item => item.id + item.name}
       />
-      <PlayControlBottom  {...props} />
+      <PlayControlBottom {...props} />
     </View>
   );
 }
@@ -86,7 +83,7 @@ const style = StyleSheet.create({
   root: {
     flex: 1,
     paddingTop: 15,
-    justifyContent: "space-between"
+    justifyContent: 'space-between',
   },
   searchBar: {
     // height:32,

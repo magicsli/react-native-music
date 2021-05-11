@@ -6,6 +6,23 @@ class appStore {
     makeObservable(this);
   }
 
+  @observable toastObj = ''; // 提示框对象实例
+
+  /**
+   * 注册提示框实例
+   */
+  @action setToast(toast = {}) {
+    this.toastObj = toast;
+  }
+
+  /**
+   * 切换提示信息
+   */
+  @action toast(text = '', duration = 2000, callback, onPress) {
+    this.toastObj.close();
+    this.toastObj.show(text, duration, callback, onPress);
+  }
+
   @observable playMusic = null; // 歌曲信息
   @observable playMusicRound = null; // 播放round实例
 
@@ -31,9 +48,10 @@ class appStore {
       Sound.MAIN_BUNDLE,
       action('initPlay', error => {
         if (error) {
-          Alert.alert('播放失败。。。');
+          this.toast('播放失败。。。');
         }
-
+        // 由于mobx迷之响应， 如果直接读取_playing 无法更新组件， 所以手动记录播放状态， 此为下策
+        this.changeStatus({open: true});
         this.playMusicRound.play(success => {
           if (success) {
             // 播放结束
@@ -54,7 +72,7 @@ class appStore {
    * 切换播放状态
    */
   @action checkPlay() {
-    if (this._playing) {
+    if (this.playMusicRound?.isPlaying()) {
       this.stopPlay();
     } else {
       this.openPlay();
@@ -65,16 +83,18 @@ class appStore {
    * 暂停播放
    */
   @action stopPlay() {
+    // 由于mobx迷之响应， 如果直接读取_playing 无法更新组件， 所以手动记录播放状态， 此为下策
+    this.changeStatus({open: !this.playMusicRound?.isPlaying()});
     this.playMusicRound?.pause();
-    // this.changeStatus({open: false});
   }
 
   /**
    * 继续播放
    */
   @action openPlay() {
+    // 由于mobx迷之响应， 如果直接读取_playing 无法更新组件， 所以手动记录播放状态， 此为下策
+    this.changeStatus({open: !this.playMusicRound?.isPlaying()});
     this.playMusicRound?.play();
-    // this.changeStatus({open: true});
   }
 
   /**
@@ -113,7 +133,7 @@ class appStore {
   }
 
   /**
-   * 重置播放的歌单列表 (并选中播放第一首)
+   * 重置播放的播放列表 (并选中播放第一首)
    * @param {Array} list 歌曲ID
    */
   @action resetSongList(list = []) {
@@ -126,14 +146,39 @@ class appStore {
   }
 
   /**
+   * 往歌单中添加音乐（默认地址为下一首）
+   * @param {Object} song 歌曲
+   */
+  @action pushSong(song) {
+    const index = this.songList.findIndex(item => item.id === song.id);
+    if (index !== -1) {
+      console.error('ERROR: 需要切换的音乐【已存在】当前歌单列表中！！！');
+      return;
+    } else {
+      // this.playIndex = index;
+      if (this.playIndex + 1 === this.songList.length) {
+        // 如果当前播放的英语是最后一曲
+        this.songList.push(song);
+      } else if (this.songList.length === 0) {
+        // 若当前没有播放列表 添加歌曲，并默认播放
+        this.songList.push(song);
+        this.playIndex = 0;
+        this.palyMusicById(song.id);
+      } else {
+        this.songList.splice(this.playIndex + 1, 0, song);
+      }
+      this.toast('已添加至下一首播放');
+    }
+  }
+
+  /**
    * 切换播放列表中的播放顺序
    * @param {Array} list 歌曲ID
    */
   @action palyMusicById(id) {
     const index = this.songList.findIndex(item => item.id === id);
     if (index === -1) {
-      // 一般不会进入此判断， 如果歌曲不在歌单之内， 则将歌曲添加至当前索引位置
-      this.songList.splice(this.playIndex, 1, id, this.songList[this.playIndex]?.id);
+      console.error('ERROR: 需要切换的音乐并不在当前歌单列表中！！！');
     } else {
       this.playIndex = index;
     }
@@ -180,13 +225,13 @@ class appStore {
     const index = this.songList.findIndex(item => item.id === id);
     if (index === -1) {
       // 一般不会进入此判断， 如果歌曲不在歌单之内，则删除失败
-      Alert('此歌曲不在播放列表中');
+      this.toast('此歌曲不在播放列表中');
     } else {
       // 如果删除的是当前正在播放的歌曲， 则自动进行下一首
       // this.nextPlay()
       this.songList.splice(index, 1);
       // this.songList = [...this.songList];
-      this.pushMusicById(this.songList[this.playIndex]);
+      this.pushMusicById(this.songList[this.playIndex].id);
     }
   }
 
@@ -196,7 +241,13 @@ class appStore {
 
   // 播放状态
   @computed get _playing() {
-    return this.playMusicRound?.isPlaying();
+    const round = this.playMusicRound;
+    return round?._playing;
+  }
+
+  // 播放状态
+  @computed get getPlayMusicRound() {
+    return this.playMusicRound || '';
   }
 
   // 歌曲加载状态
