@@ -1,30 +1,53 @@
-import React, {useState, useEffect} from 'react';
+import React, {useState, useEffect, useRef} from 'react';
 import {Text, View, StyleSheet, ScrollView, Image} from 'react-native';
 import {Icon, SearchBar} from 'react-native-elements';
-import {getSearch, getDetail} from '@/api';
+import {getSearch, getSearchRecommend} from '@/api';
 import {debounce, getRandomLove} from '@/utils';
 import {observer, inject} from 'mobx-react';
 import PlayControlBottom from '@/components/PlayControlBottom';
+import RotateInView from '@/components/RotateInView';
+import Loading from '@/components/Loading';
+
+// 使用 AbortController 进行请求拦截
 
 const loveName = getRandomLove();
-const handleSearch = debounce(search => {
-  return getSearch({keywords: search});
-});
+const handleSearch = debounce(keywords => getSearch({keywords}));
 
 function User(props) {
-  const [search, setSearch] = useState('tk');
+  const [search, setSearch] = useState('');
 
   const [searchList, setSearchList] = useState([]);
+
+  const [loading, setLoading] = useState(false);
+
+  const [recommend, setRecommend] = useState([]);
+
+  const [scroll, setScroll] = useState(null);
+
+  useEffect(() => {
+    getSearchRecommend().then(res => {
+      setRecommend(res?.result?.hots);
+    });
+  }, []);
+
   useEffect(() => {
     if (!search) {
-      // 如果没有搜索值， 不执行请求操作
+      setLoading(false);
       setSearchList([]);
       return;
     }
-    handleSearch(search).then(res => {
-      console.log(res);
-      setSearchList(res.result?.songs || []);
-    });
+
+    setLoading(true);
+
+    // 存在一个当用户操作过快时， 前边的请求会覆盖后边的数据的Bug -2021/05/12
+    handleSearch(search)
+      .then(res => {
+        scroll?.scrollTo({y: 0});
+        setSearchList(res.result?.songs || []);
+      })
+      .finally(() => {
+        setLoading(false);
+      });
   }, [search]);
 
   const getMusicDetail = id => {
@@ -44,7 +67,19 @@ function User(props) {
         onChangeText={setSearch}
         value={search}
       />
-      <ScrollView style={{flex: 1}}>
+
+      <ScrollView ref={e => setScroll(e)} style={{flex: 1, position: 'relative'}}>
+        <View>
+          <Text style={style.tagTitle}>热搜</Text>
+          <View style={style.tagList}>
+            {recommend?.map(item => (
+              <Text onPress={() => setSearch(item.first)} key={item.first} style={style.tagItem}>
+                {item.first}
+              </Text>
+            ))}
+          </View>
+        </View>
+        <Loading style={style.loading} show={loading} />
         {searchList.map((item, index) => (
           <View key={item.id} style={style.searchItem}>
             <View onTouchEnd={() => getMusicDetail(item.id)} style={style.searchItemInfo}>
@@ -99,6 +134,31 @@ const style = StyleSheet.create({
     fontSize: 12,
     marginLeft: 10,
     color: 'red',
+  },
+  tagTitle: {
+    fontSize: 14,
+    color: '#999',
+    paddingHorizontal: 10,
+    paddingVertical: 15,
+  },
+  tagList: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    paddingLeft: 10,
+    marginBottom: 10,
+  },
+  tagItem: {
+    fontSize: 12,
+    color: '#888',
+    backgroundColor: '#ccc',
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 12,
+    marginRight: 10,
+    marginBottom: 10,
+  },
+  loading: {
+    marginTop: 20,
   },
   searchItem: {
     flexDirection: 'row',

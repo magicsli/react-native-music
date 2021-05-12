@@ -20,7 +20,7 @@ class appStore {
    */
   @action toast(text = '', duration = 2000, callback, onPress) {
     this.toastObj.close();
-    this.toastObj.show(text, duration, callback, onPress);
+    this.toastObj?.show(text, duration, callback, onPress);
   }
 
   @observable playMusic = null; // 歌曲信息
@@ -109,7 +109,7 @@ class appStore {
     if (!id) return;
     this.changeStatus({loading: true});
 
-    const detailSync = getMusicUrlDetail({ids: id});
+    const detailSync = getMusicUrlDetail({ids: id.toString()});
 
     const palyInfoSync = getMusicUrl({id});
 

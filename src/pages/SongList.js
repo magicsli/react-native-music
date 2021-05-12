@@ -12,6 +12,7 @@ function SongList(props) {
   const [detail, setDetail] = useState(null);
   const [playList, setPlayList] = useState([]);
   useEffect(() => {
+    console.log(id);
     getPlaylistDetail({id}).then(res => {
       setDetail(res.playlist);
       if (res?.trackIds?.[0]?.name) {
@@ -19,7 +20,7 @@ function SongList(props) {
       } else {
         getMusicUrlDetail({ids: res?.playlist?.trackIds?.map(item => item.id)?.join()}).then(res => {
           console.log(res);
-          setPlayList(res.songs);
+          res && setPlayList(res?.songs);
         });
       }
     });

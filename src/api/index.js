@@ -7,14 +7,16 @@ export const getdj = data => request('/personalized/privatecontent/list', data, 
 export const getPlayList = data => request('/top/playlist/highquality', data, 'get');
 
 // 获取歌单详情
-export const getPlaylistDetail = data => request('/playlist/detail', data, 'get');
+export const getPlaylistDetail = data => request('/playlist/detail', data, 'post');
 
 // 搜索
 export const getSearch = data => request('/cloudsearch', data, 'get');
+
+// 默认推荐搜索关键词
+export const getSearchRecommend = data => request('/search/hot', data, 'get');
 
 // 获取歌曲地址
 export const getMusicUrl = data => request('/song/url', data, 'get');
 
 // 获取歌曲详情
-export const getMusicUrlDetail = data => request('/song/detail', data, 'get');
-
+export const getMusicUrlDetail = data => request('/song/detail', data, 'post');

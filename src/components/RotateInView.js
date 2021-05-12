@@ -1,7 +1,7 @@
 import React, {useRef, useEffect} from 'react';
 import {Animated, Easing} from 'react-native';
 
-const RotateInView = React.memo((props = {isPlay: true}) => {
+const RotateInView = React.memo((props = {isPlay: true, duration: 7200}) => {
   let rotateAnim = useRef(new Animated.Value(0)).current;
   const startAnimation = () => {
     // console.log('载入动画');
@@ -11,8 +11,7 @@ const RotateInView = React.memo((props = {isPlay: true}) => {
       rotateAnim, // 动画中的变量值
       {
         toValue: 360, //
-        delay: 0,
-        duration: 7200, // 让动画持续一段时间
+        duration: props.duration || 7200, // 让动画持续一段时间
         easing: Easing.out(Easing.linear),
         useNativeDriver: true,
       },
