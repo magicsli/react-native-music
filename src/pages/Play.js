@@ -1,4 +1,5 @@
 import React, {useState, useEffect} from 'react';
+import {secondToMinute, minuteToSecond} from '@/utils';
 import {Text, View, Image, ImageBackground, StyleSheet} from 'react-native';
 import {getMusicUrl, getMusicUrlDetail} from '@/api';
 import RotateInView from '@/components/RotateInView';
@@ -7,15 +8,26 @@ var Sound = require('react-native-sound');
 import {observer, inject} from 'mobx-react';
 
 function Play(props) {
-  const {playMusic, playMusicRound} = props.store;
+  const {playMusic, playMusicStatus, playMusicRound, setPlayTime} = props.store;
   const ID = props?.route?.params?.id || playMusic?.id;
-  const [value, setvalue] = useState(0);
 
-  // const MusicLength = ((playMusicRound?._duration || 0) / 60).toFixed(2);
-  const MusicLength = 4;
+  const MusicLength = secondToMinute(playMusicStatus?.duration);
+  const value = secondToMinute(playMusicStatus?.time);
+  // const MusicLength = 4;
 
-  // console.log(playMusicRound?.getCurrentTime());
+  useEffect(() => {
+    console.log(playMusicStatus);
+    console.log(secondToMinute(playMusicStatus.duration), 1000);
+    console.log(playMusicRound);
+  }, []);
 
+  const handleSetTime = value => {
+    // console.log(playMusicRound)
+    // console.log(minuteToSecond(value))
+    props.store.setPlayTime(minuteToSecond(value));
+    // playMusicRound?.setCurrentTime(minuteToSecond(value))
+  };
+  const _playing = playMusicStatus.open;
   return (
     <ImageBackground blurRadius={36} style={styles.root} source={{uri: playMusic?.al?.picUrl}}>
       <View style={styles.main}>
@@ -32,10 +44,11 @@ function Play(props) {
           <View style={styles.sliderLine}>
             <Text style={styles.sliderLabel}>{value.toFixed(2)}</Text>
             <Slider
+              allowTouchTrack={true}
               thumbStyle={{width: 10, height: 10}}
               style={styles.slider}
               value={value}
-              onValueChange={value => setvalue(value)}
+              onValueChange={handleSetTime}
               maximumValue={MusicLength}
               minimumValue={0}
               step={0.01}
@@ -43,9 +56,15 @@ function Play(props) {
             <Text style={styles.sliderLabel}>{MusicLength.toFixed(2)}</Text>
           </View>
           <View style={styles.operationLine}>
-            <Icon name="stepbackward" size={28} type="antdesign" color="#fff" />
-            <Icon name="playcircleo" style={{marginHorizontal: 30}} size={40} type="antdesign" color="#fff" />
-            <Icon name="stepforward" size={28} type="antdesign" color="#fff" />
+            <View>
+              <Icon onPress={() => props.store.prevPlay()} name="stepbackward" size={28} type="antdesign" color="#fcfcfc" />
+            </View>
+            <View style={styles.openBtn}>
+              <Icon onPress={() => props.store.checkPlay()} name={ _playing ?  "pausecircleo" : "playcircleo"}  size={40} type="antdesign" color="#fcfcfc" />
+            </View>
+            <View>
+              <Icon onPress={() => props.store.nextPlay()} name="stepforward" size={28} type="antdesign" color="#fcfcfc" />
+            </View>
           </View>
         </View>
       </View>
@@ -57,6 +76,7 @@ const styles = StyleSheet.create({
   root: {
     flex: 1,
     shadowOpacity: 3,
+    backgroundColor: "#fcfcfc"
   },
   main: {
     flex: 1,
@@ -115,5 +135,8 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     marginTop: 10,
     color: '#fff',
+  },
+  openBtn: {
+    marginHorizontal: 40,
   },
 });

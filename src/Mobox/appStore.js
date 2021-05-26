@@ -24,16 +24,20 @@ class appStore {
   }
 
   @observable playMusic = null; // 歌曲信息
-  @observable playMusicRound = null; // 播放round实例
+  @observable playMusicRound = null; // 播放sound实例
 
   @observable playMusicStatus = {
     // 播放状态
+    duration: 0, // 播放时长
     loading: false, // 是否处于加载中
     open: false, // 是否处于播放中
+    time: 0, // 播放进度
   };
 
-  @observable songList = []; // 歌曲信息
+  @observable songList = []; // 播放队列
   @observable playIndex = 0; // 播放round实例
+
+  @observable timerTemp = null; // 辅助更新状态计时器id
 
   /**
    * 更新当前播放音乐/播放器实例
@@ -50,9 +54,28 @@ class appStore {
         if (error) {
           this.toast('播放失败。。。');
         }
+
+        this.timerTemp && clearInterval(this.timerTemp)
+        this.timerTemp = null;
+        const  duration = this.playMusicRound?.getDuration()
+        // 更新播放时长
+        this.changeStatus({
+          duration: duration
+        })
+        // 更新播放信息
+        this.updatePalyInfo()
+
+        this.timerTemp = setInterval(() => {
+          this.updatePalyInfo()
+        }, 100);
+
         // 由于mobx迷之响应， 如果直接读取_playing 无法更新组件， 所以手动记录播放状态， 此为下策
-        this.changeStatus({open: true});
+        
         this.playMusicRound.play(success => {
+
+          this.timerTemp && clearInterval(this.timerTemp)
+          this.timerTemp = null
+
           if (success) {
             // 播放结束
             console.log('successfully finished playing');
@@ -77,6 +100,23 @@ class appStore {
     } else {
       this.openPlay();
     }
+  }
+
+  // 切换播放进度
+  @action setPlayTime(value) {
+    // console.log(this.playMusicRound)
+    this.playMusicRound?.setCurrentTime(value);
+  }
+
+  // 更新播放进度
+  @action updatePalyInfo() {
+    this.playMusicRound?.getCurrentTime((seconds, playing) => {
+      // console.log(seconds)
+      this.changeStatus({
+        open: playing,
+        time: Math.floor(seconds),
+      })
+    });
   }
 
   /**
